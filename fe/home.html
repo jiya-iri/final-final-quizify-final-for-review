@@ -78,11 +78,6 @@
                     </button>
                 </div>
 
-                <!-- ✅ Summary Output Section -->
-                <div id="summaryOutput" class="hidden text-center w-full max-w-3xl">
-                    <h3 class="text-xl font-semibold mb-4">Summary</h3>
-                    <p id="summaryText" class="bg-gray-800 p-4 rounded mb-6 text-left"></p>
-                </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
                     <div onclick="showSummary()" class="cursor-pointer bg-gray-800 rounded-lg p-6 flex flex-col items-center hover:shadow-lg hover:shadow-purple-500 transform transition duration-300 border border-transparent hover:border-purple-500">
@@ -109,6 +104,14 @@
                         <h3 class="text-lg font-medium mb-2">Notes</h3>
                     </div>
                 </div>
+                
+
+                <!-- ✅ Summary Output Section -->
+                <div id="summaryOutput" class="hidden text-center w-full max-w-3xl">
+                    <h3 class="text-xl font-semibold mb-4">Summary</h3>
+                    <p id="summaryText" class="bg-gray-800 p-4 rounded mb-6 text-left"></p>
+                </div>
+
 
                 <!-- Hidden Notes Section -->
                 <div id="notesOutput" class="hidden mt-10 w-full max-w-4xl bg-gray-800 p-6 rounded-lg border border-purple-500">
@@ -154,6 +157,18 @@
         function showNotes() {
             document.getElementById('notesOutput').classList.remove('hidden');
             document.getElementById('notesOutput').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Check if the user is logged in
+        window.onload = function() {
+            if (!localStorage.getItem('authToken')) {
+                window.location.href = 'AuthForm.html'; // Redirect if not logged in
+            }
+        };
+
+        function logout() {
+            localStorage.removeItem('authToken');  // Remove auth token on logout
+            window.location.href = 'landingPage.html'; // Redirect to landing page
         }
     </script>
 </body>

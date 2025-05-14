@@ -118,10 +118,12 @@
 
         const data = await response.json();
         if (response.ok) {
+          // ✅ Store token BEFORE redirect
+          localStorage.setItem("authToken", data.token);
           alert("Login successful");
+
+          // ✅ Now redirect
           window.location.href = "/fe/home.html";
-          
-          // redirect or store session
         } else {
           alert(data.error || "Login failed");
         }

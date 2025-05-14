@@ -37,6 +37,17 @@
     <div id="quizContainer" class="space-y-6"></div>
   </div>
 
+  <!-- Score Modal -->
+  <div id="scoreModal" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-xs w-full">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">Your Score</h2>
+      <p id="scoreText" class="text-3xl font-bold text-indigo-600 mb-4"></p>
+      <button onclick="closeScoreModal()" class="mt-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
+        Close
+      </button>
+    </div>
+  </div>
+
   <script>
     async function loadQuestions() {
       const count = document.getElementById("count").value || 5;
@@ -92,15 +103,20 @@
         let allQuestions = [];
         let idx = 0;
 
-        if (data.fill_in_the_blank) {
-          allQuestions = allQuestions.concat(
-            data.fill_in_the_blank.map((q) => renderQuestion(q, idx++, "fill"))
-          );
+        if (type === "fill_in_the_blank" || type === "both") {
+          if (data.fill_in_the_blank) {
+            allQuestions = allQuestions.concat(
+              data.fill_in_the_blank.map((q) => renderQuestion(q, idx++, "fill"))
+            );
+          }
         }
-        if (data.mcq) {
-          allQuestions = allQuestions.concat(
-            data.mcq.map((q) => renderQuestion(q, idx++, "mcq"))
-          );
+
+        if (type === "mcq" || type === "both") {
+          if (data.mcq) {
+            allQuestions = allQuestions.concat(
+              data.mcq.map((q) => renderQuestion(q, idx++, "mcq"))
+            );
+          }
         }
 
         container.innerHTML = allQuestions.join("");
@@ -162,11 +178,17 @@
       const mcqBtns = document.querySelectorAll("button[data-correct='true']");
       score += mcqBtns.length * 10;
 
-      alert(`Your score: ${score}`);
+      showScoreModal(score);
     }
 
-    // Optional: auto-load questions
-    // window.onload = loadQuestions;
+    function showScoreModal(score) {
+      document.getElementById("scoreText").innerText = `${score} / 100`;
+      document.getElementById("scoreModal").classList.remove("hidden");
+    }
+
+    function closeScoreModal() {
+      document.getElementById("scoreModal").classList.add("hidden");
+    }
   </script>
 </body>
 </html>

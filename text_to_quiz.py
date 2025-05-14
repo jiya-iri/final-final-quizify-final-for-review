@@ -14,7 +14,8 @@ def create_fill_in_the_blank_questions(text, count=5):
     for sentence in sentences:
         words = sentence.split()
         if len(words) > 5:
-            word_candidates = [w for w in words if w.strip(".,?!").isalpha()]
+            # Strip punctuation marks while keeping the words
+            word_candidates = [w.strip(".,?!") for w in words if w.strip(".,?!").isalpha()]
             if word_candidates:
                 missing_word = random.choice(word_candidates)
                 question = sentence.replace(missing_word, "_____")
@@ -29,6 +30,7 @@ def create_fill_in_the_blank_questions(text, count=5):
 
 # Function to generate distractors
 def generate_distractors(correct_answer, word_list):
+    # Filter out the correct answer and ensure there are enough distractors
     word_list = [w for w in word_list if w.lower() != correct_answer.lower()]
     distractors = random.sample(word_list, min(3, len(word_list)))
     return distractors
@@ -36,13 +38,14 @@ def generate_distractors(correct_answer, word_list):
 # Function to create multiple-choice questions
 def create_mcq_questions(text, count=5):
     sentences = sent_tokenize(text)
-    word_list = list(set(re.findall(r'\b\w+\b', text)))  # All words in the text
+    word_list = list(set(re.findall(r'\b\w+\b', text.lower())))  # Get all unique words in lowercase
     mcq_questions = []
 
     for sentence in sentences:
         words = sentence.split()
         if len(words) > 5:
-            word_candidates = [w for w in words if w.strip(".,?!").isalpha()]
+            # Strip punctuation marks while keeping the words
+            word_candidates = [w.strip(".,?!") for w in words if w.strip(".,?!").isalpha()]
             if word_candidates:
                 correct_answer = random.choice(word_candidates)
                 question = sentence.replace(correct_answer, "_____")
@@ -63,9 +66,13 @@ def create_mcq_questions(text, count=5):
 def generate_quiz(file_path, num_fill=5, num_mcq=5, question_type="both"):
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
-            content = file.read()
+            content = file.read().strip()
+            if not content:
+                return {"error": "File is empty"}
     except FileNotFoundError:
         return {"error": "File not found"}
+    except Exception as e:
+        return {"error": str(e)}
 
     # Basic cleanup: remove excess whitespace and non-alphanumeric characters (except punctuation)
     content = re.sub(r'\s+', ' ', content)  # Normalize whitespace

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, session, send_from_directory
+from flask import Flask, request, jsonify, session, send_from_directory, redirect, url_for
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -9,6 +9,7 @@ import os
 import nltk
 from text_to_quiz import generate_quiz
 from models import User, score, db  # Ensure models are correctly imported
+from datetime import timedelta
 
 # Setup
 nltk.download('punkt')
@@ -21,6 +22,7 @@ CORS(app, supports_credentials=True)
 app.secret_key = "your_secret_key"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)  # Session timeout setting
 
 # Initialize extensions
 bcrypt = Bcrypt(app)
@@ -28,6 +30,9 @@ login_manager = LoginManager(app)
 
 # Initialize database
 db.init_app(app)
+
+# Set the login view for Flask-Login
+login_manager.login_view = 'auth_form'
 
 # -------------------------------
 # User loader for Flask-Login
@@ -55,7 +60,6 @@ def register():
     db.session.commit()
     return jsonify({"message": "User registered successfully"}), 201
 
-
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -64,10 +68,9 @@ def login():
 
     user = User.query.filter_by(email=email).first()
     if user and bcrypt.check_password_hash(user.password, password):
-        login_user(user)
+        login_user(user, remember=True)  # Keep user logged in across sessions
         return jsonify({"message": "Login successful"}), 200
     return jsonify({"error": "Invalid email or password"}), 401
-
 
 @app.route('/logout', methods=['POST'])
 @login_required
@@ -93,7 +96,6 @@ def download_audio(youtube_url, output_path="audio.mp3"):
         print(f"❌ Failed to download audio: {e}")
         raise e
 
-
 def transcribe_audio(audio_path):
     print("⏳ Loading Whisper model...")
     model = whisper.load_model("base")
@@ -107,7 +109,6 @@ def transcribe_audio(audio_path):
         file.write(transcription)
         print(f"📝 Transcription saved to {output_file}")
     return transcription
-
 
 def summarize_text(text, max_chunk_length=1000):
     summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
@@ -136,7 +137,6 @@ def summarize_text(text, max_chunk_length=1000):
 
     final_summary = " ".join(summaries)
     return final_summary
-
 
 def summarize_youtube_video(youtube_url):
     try:
@@ -173,17 +173,26 @@ def summarize():
     else:
         return jsonify({"error": "Failed to summarize video"}), 500
 
-
 @app.route('/ques')
 @login_required
 def serve_ques_page():
     return send_from_directory(app.static_folder, 'ques.html')
 
+@app.route('/home')
+@login_required
+def serve_home_page():
+    # Check if the user is logged in
+    if current_user.is_authenticated:
+        return send_from_directory(app.static_folder, 'home.html')
+    return redirect(url_for('auth_form'))  # Redirect to login if not authenticated
+
+@app.route('/auth')
+def auth_form():
+    return send_from_directory(app.static_folder, 'AuthForm.html')
 
 @app.route('/')
 def serve_landing_page():
     return send_from_directory(app.static_folder, 'landingPage.html')
-
 
 @app.route('/api/quiz', methods=['GET'])
 @login_required
@@ -192,7 +201,6 @@ def quiz():
     file_path = "transcription.txt"
     quiz_data = generate_quiz(file_path, num_fill=count, num_mcq=count)
     return jsonify(quiz_data)
-
 
 @app.route('/quiz/answers', methods=['POST'])
 @login_required
@@ -212,15 +220,13 @@ def get_answers():
 
     return jsonify(answers)
 
-
 @app.route('/submit_score', methods=['POST'])
 @login_required
 def submit_score():
     data = request.get_json()
     score_value = int(data.get('score', 0))
 
-    # Correct class name to match your model (`score` not `Score`)
-    new_score = score(user_id=current_user.id, score=score_value, total_questions=10, question_type='mcq')  # Assuming some default values
+    new_score = score(user_id=current_user.id, score=score_value, total_questions=10, question_type='mcq')
     try:
         db.session.add(new_score)
         db.session.commit()
@@ -230,11 +236,10 @@ def submit_score():
         print(f"Error saving score: {e}")
         return jsonify({"error": "Failed to submit score"}), 500
 
-
 @app.route('/leaderboard', methods=['GET'])
 @login_required
 def leaderboard():
-    top_scores = score.query.order_by(score.score.desc()).limit(10).all()  # Correct class name here as well
+    top_scores = score.query.order_by(score.score.desc()).limit(10).all()
     result = []
     for s in top_scores:
         user = User.query.get(s.user_id)
@@ -244,6 +249,16 @@ def leaderboard():
             "timestamp": s.timestamp.strftime("%Y-%m-%d %H:%M:%S")
         })
     return jsonify(result)
+
+# -------------------------------
+# Disable caching for back-button protection
+# -------------------------------
+@app.after_request
+def add_header(response):
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 # -------------------------------
 # Run App
