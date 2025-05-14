@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home page</title>
+    <style>
+        @import url(https://fonts.googleapis.com/css2?family=Lato&display=swap);
+        @import url(https://fonts.googleapis.com/css2?family=Open+Sans&display=swap);
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #333;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            right: 0;
+        }
+
+        .dropdown-content a {
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #575757;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="webcrumbs">
+        <div class="min-h-screen bg-gray-900 text-white">
+            <header class="bg-gray-800 shadow-md py-4 px-6">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-xl font-bold text-white hover:text-purple-400 transition duration-300">Quizify</h1>
+                    <nav>
+                        <ul class="flex space-x-6">
+                            <li><a href="#" class="hover:text-purple-400 transition duration-300">Home</a></li>
+                            <li><a href="#" class="hover:text-purple-400 transition duration-300">About</a></li>
+                            <li><a href="#" class="hover:text-purple-400 transition duration-300">Contact</a></li>
+                        </ul>
+                    </nav>
+                    <div class="dropdown">
+                        <button class="bg-gray-700 text-white p-2 rounded-full flex items-center">👤</button>
+                        <div class="dropdown-content">
+                            <a href="#">View Leaderboard</a>
+                            <a href="#">Profile/Info</a>
+                            <a href="#" onclick="logout()">Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="container mx-auto px-4 py-12 flex flex-col items-center">
+                <h2 class="text-2xl font-semibold mb-8">Enter YouTube Link</h2>
+                <div class="flex w-full max-w-lg mb-16">
+                    <input type="text" placeholder="Paste YouTube URL here..." id="youtubeUrl"
+                        class="bg-gray-800 text-white py-2 px-4 rounded-l flex-grow focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-300" />
+                    <button
+                        class="bg-purple-600 hover:bg-purple-700 py-2 px-4 rounded-r transform hover:scale-105 transition duration-300"
+                        onclick="fetchSummary(document.getElementById('youtubeUrl').value)">
+                        Generate
+                    </button>
+                </div>
+
+                <!-- ✅ Summary Output Section -->
+                <div id="summaryOutput" class="hidden text-center w-full max-w-3xl">
+                    <h3 class="text-xl font-semibold mb-4">Summary</h3>
+                    <p id="summaryText" class="bg-gray-800 p-4 rounded mb-6 text-left"></p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
+                    <div onclick="showSummary()" class="cursor-pointer bg-gray-800 rounded-lg p-6 flex flex-col items-center hover:shadow-lg hover:shadow-purple-500 transform transition duration-300 border border-transparent hover:border-purple-500">
+                        <svg class="w-12 h-12 text-purple-500 mb-4" viewBox="0 0 24 24" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19ZM7 10H9V17H7V10ZM11 7H13V17H11V7ZM15 13H17V17H15V13Z" fill="currentColor"/>
+                        </svg>
+                        <h3 class="text-lg font-medium mb-2">Summary</h3>
+                    </div>
+
+                    <div onclick="window.location.href='ques.html'" class="cursor-pointer bg-gray-800 rounded-lg p-6 flex flex-col items-center hover:shadow-lg hover:shadow-purple-500 transform transition duration-300 border border-transparent hover:border-purple-500">
+                        <svg class="w-12 h-12 text-purple-500 mb-4" viewBox="0 0 24 24" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20ZM11 16H13V18H11V16ZM12.61 6.04C10.55 5.74 8.73 7.01 8.18 8.83C8 9.41 8.44 10 9.05 10H9.25C9.66 10 9.99 9.71 10.13 9.33C10.45 8.44 11.4 7.83 12.43 8.05C13.38 8.25 14.08 9.18 14 10.15C13.9 11.49 12.38 11.78 11.55 13.03C11.42 13.25 11.33 13.42 11.26 13.6C11.21 13.7 11.2 13.72 11.2 13.75C11.08 14.09 11 14.5 11 15H13C13 14.58 13.11 14.23 13.28 13.93C13.41 13.7 13.85 13.18 13.97 13.07C14.93 12.16 16.23 11.42 15.96 9.51C15.72 7.77 14.35 6.3 12.61 6.04Z" fill="currentColor"/>
+                        </svg>
+                        <h3 class="text-lg font-medium mb-2">Questions</h3>
+                    </div>
+
+                    <div onclick="showNotes()" class="cursor-pointer bg-gray-800 rounded-lg p-6 flex flex-col items-center hover:shadow-lg hover:shadow-purple-500 transform transition duration-300 border border-transparent hover:border-purple-500">
+                        <svg class="w-12 h-12 text-purple-500 mb-4" viewBox="0 0 24 24" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 5C19.89 4.65 18.67 4.5 17.5 4.5C15.55 4.5 13.45 4.9 12 6C10.55 4.9 8.45 4.5 6.5 4.5C4.55 4.5 2.45 4.9 1 6V20.65C1 20.9 1.25 21.15 1.5 21.15C1.6 21.15 1.65 21.1 1.75 21.1C3.1 20.45 5.05 20 6.5 20C8.45 20 10.55 20.4 12 21.5C13.35 20.65 15.8 20 17.5 20C19.15 20 20.85 20.3 22.25 21.05C22.35 21.1 22.4 21.1 22.5 21.1C22.75 21.1 23 20.85 23 20.6V6C22.4 5.55 21.75 5.25 21 5ZM21 18.5C19.9 18.15 18.7 18 17.5 18C15.8 18 13.35 18.65 12 19.5V8C13.35 7.15 15.8 6.5 17.5 6.5C18.7 6.5 19.9 6.65 21 7V18.5Z" fill="currentColor"/>
+                        </svg>
+                        <h3 class="text-lg font-medium mb-2">Notes</h3>
+                    </div>
+                </div>
+
+                <!-- Hidden Notes Section -->
+                <div id="notesOutput" class="hidden mt-10 w-full max-w-4xl bg-gray-800 p-6 rounded-lg border border-purple-500">
+                    <h4 class="text-xl font-semibold mb-4">Notes</h4>
+                    <p>This is a placeholder for notes. It will be dynamically updated in the future.</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            content: ["./src/**/*.{html,js}"],
+            theme: {
+                fontFamily: {
+                    sans: ["Open Sans", "ui-sans-serif", "system-ui"],
+                    title: ["Lato", "ui-sans-serif", "system-ui"]
+                }
+            },
+            important: "#webcrumbs"
+        }
+
+        function fetchSummary(url) {
+            fetch('http://127.0.0.1:5000/summarize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ youtube_url: url })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('summaryText').innerText = data.summary || "No summary available.";
+                showSummary();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function showSummary() {
+            document.getElementById('summaryOutput').classList.remove('hidden');
+            document.getElementById('summaryOutput').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showNotes() {
+            document.getElementById('notesOutput').classList.remove('hidden');
+            document.getElementById('notesOutput').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

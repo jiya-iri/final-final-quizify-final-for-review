@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz Questions</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0f172a] text-white min-h-screen font-sans">
+  <div class="p-6 max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-center mb-6">Quiz Questions</h1>
+
+    <div class="mb-4 flex flex-wrap justify-center items-center gap-4">
+      <!-- Number of Questions -->
+      <label for="count" class="text-lg">Number of Questions:</label>
+      <input type="number" id="count" value="5" min="1" class="p-2 rounded text-black w-24"/>
+
+      <!-- Type of Questions -->
+      <label for="questionType" class="text-lg">Question Type:</label>
+      <select id="questionType" class="p-2 rounded text-black">
+        <option value="both">Both</option>
+        <option value="fill_in_the_blank">Fill in the Blanks</option>
+        <option value="mcq">MCQ</option>
+      </select>
+
+      <!-- Show Answers Toggle -->
+      <label class="flex items-center gap-2 text-lg">
+        <input type="checkbox" id="showAnswers" class="accent-purple-500" />
+        Show Answers
+      </label>
+
+      <!-- Generate Button -->
+      <button onclick="loadQuestions()" class="bg-purple-600 px-4 py-2 rounded hover:bg-purple-700">Generate</button>
+    </div>
+
+    <!-- Quiz Questions -->
+    <div id="quizContainer" class="space-y-6"></div>
+  </div>
+
+  <script>
+    async function loadQuestions() {
+      const count = document.getElementById("count").value || 5;
+      const type = document.getElementById("questionType").value || "both";
+      const showAnswers = document.getElementById("showAnswers").checked;
+
+      try {
+        const res = await fetch(`/api/quiz?count=${count}&type=${type}`, {
+          credentials: "include"
+        });
+
+        if (res.status === 401) {
+          window.location.href = "/";
+          return;
+        }
+
+        const data = await res.json();
+        const container = document.getElementById("quizContainer");
+        container.innerHTML = "";
+
+        if (data.error) {
+          container.innerHTML = `<p class="text-red-500">${data.error}</p>`;
+          return;
+        }
+
+        const renderQuestion = (q, index, qType) => {
+          let html = `<div class="p-4 bg-[#1e293b] rounded-lg shadow">
+                        <p class="font-semibold mb-2">Q${index + 1}: ${q.question}</p>`;
+
+          if (qType === "mcq") {
+            html += `<ul class="space-y-2">`;
+            q.options.forEach((opt, i) => {
+              const optId = `q${index}_opt${i}`;
+              html += `<li>
+                <button onclick="checkMCQAnswer(this, '${q.answer}', '${opt}', ${showAnswers})"
+                        class="px-4 py-1 bg-gray-700 hover:bg-gray-600 rounded w-full text-left">
+                  ${String.fromCharCode(65 + i)}. ${opt}
+                </button>
+              </li>`;
+            });
+            html += `</ul>`;
+          } else {
+            html += `<input type="text" class="mt-2 p-2 w-full rounded text-black"
+                            onblur="checkFillAnswer(this, '${q.answer}', ${showAnswers})"
+                            placeholder="Your answer here" />
+                     <p class="answer-feedback mt-2 text-green-400 hidden">Correct Answer: ${q.answer}</p>`;
+          }
+
+          html += `</div>`;
+          return html;
+        };
+
+        let allQuestions = [];
+        let idx = 0;
+
+        if (data.fill_in_the_blank) {
+          allQuestions = allQuestions.concat(
+            data.fill_in_the_blank.map((q) => renderQuestion(q, idx++, "fill"))
+          );
+        }
+        if (data.mcq) {
+          allQuestions = allQuestions.concat(
+            data.mcq.map((q) => renderQuestion(q, idx++, "mcq"))
+          );
+        }
+
+        container.innerHTML = allQuestions.join("");
+
+        // Add score button
+        container.innerHTML += `
+          <button onclick="calculateScore()" 
+                  class="mt-6 bg-blue-600 px-6 py-2 rounded hover:bg-blue-700 block mx-auto">
+            Show Score
+          </button>`;
+      } catch (error) {
+        console.error("Failed to load questions:", error);
+        document.getElementById("quizContainer").innerHTML =
+          `<p class="text-red-500">Failed to load questions. Try again.</p>`;
+      }
+    }
+
+    function checkMCQAnswer(button, correct, selected, show) {
+      const parent = button.parentElement.parentElement;
+      const allOptions = parent.querySelectorAll("button");
+      allOptions.forEach(btn => {
+        btn.disabled = true;
+        if (btn.textContent.includes(correct)) {
+          if (show) btn.classList.add("bg-green-600");
+        } else if (btn.textContent.includes(selected)) {
+          if (show) btn.classList.add("bg-red-600");
+        }
+      });
+
+      if (selected === correct) {
+        button.dataset.correct = "true";
+      }
+    }
+
+    function checkFillAnswer(input, correct, show) {
+      const userAns = input.value.trim().toLowerCase();
+      const correctAns = correct.trim().toLowerCase();
+      const feedback = input.nextElementSibling;
+
+      if (show && userAns !== correctAns) {
+        feedback.classList.remove("hidden");
+      }
+
+      if (userAns === correctAns) {
+        input.dataset.correct = "true";
+      }
+    }
+
+    function calculateScore() {
+      let score = 0;
+
+      const inputs = document.querySelectorAll("input[type='text']");
+      inputs.forEach(input => {
+        if (input.dataset.correct === "true") {
+          score += 10;
+        }
+      });
+
+      const mcqBtns = document.querySelectorAll("button[data-correct='true']");
+      score += mcqBtns.length * 10;
+
+      alert(`Your score: ${score}`);
+    }
+
+    // Optional: auto-load questions
+    // window.onload = loadQuestions;
+  </script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizify - Transform Videos into Knowledge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3a8a, #9333ea);
+        }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s ease-out forwards;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="h-screen flex items-center justify-center text-white">
+
+    <div id="webcrumbs" class="w-[1200px] text-white py-16 px-8 fade-in">
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900 via-indigo-800 to-purple-900 shadow-2xl">
+            <div class="absolute top-0 left-0 w-full h-full bg-[url('https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')] opacity-10 bg-cover bg-center"></div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 p-12 relative z-10">
+                <div class="flex flex-col justify-center space-y-8">
+                    <div class="space-y-4">
+                        <div class="inline-block px-4 py-2 bg-white/10 backdrop-blur-md rounded-full mb-2">
+                            <span class="text-sm font-medium tracking-wider text-purple-200">AI-POWERED LEARNING PLATFORM</span>
+                        </div>
+                        <h1 class="text-5xl md:text-6xl font-bold leading-tight tracking-tight">
+                            Transform Videos into <span class="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-300">Knowledge</span>
+                        </h1>
+                        <p class="text-lg text-gray-200 mt-6 max-w-lg">
+                            Convert any YouTube video into interactive summaries, comprehensive quizzes, and structured notes—all powered by advanced AI technology.
+                        </p>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 mt-4">
+                        <a href="/fe/AuthForm.html">
+                            <button id="startButton" class="px-8 py-4 bg-purple-600 hover:bg-purple-700 rounded-xl text-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-purple-500/50 hover:shadow-lg group">
+                                Get Started
+                                <span class="inline-block ml-2 transition-transform duration-300 group-hover:translate-x-1">→</span>
+                            </button>
+                        </a>
+                        <button class="px-8 py-4 bg-white/10 backdrop-blur-md hover:bg-white/20 rounded-xl text-lg font-semibold transition-all duration-300 border border-white/20 hover:border-white/40">
+                            Watch Demo
+                        </button>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="p-8 text-center relative z-10">
+                <div class="flex flex-wrap justify-center gap-8 items-center">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-purple-300">verified</span>
+                        <span class="text-gray-200">AI-Powered Analysis</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-purple-300">security</span>
+                        <span class="text-gray-200">Secure Processing</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-purple-300">school</span>
+                        <span class="text-gray-200">Education-Focused</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-purple-300">bolt</span>
+                        <span class="text-gray-200">Lightning Fast</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("startButton").addEventListener("click", function() {
+            window.location.href = "main.html"; // Redirect to main page
+        });
+    </script>
+
+</body>
+</html>

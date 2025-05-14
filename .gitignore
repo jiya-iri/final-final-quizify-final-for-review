@@ -1,0 +1,4 @@
+# Already done by you
+venv/
+__pycache__/
+*.pyc
